@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connect Dots Prototype</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="watermark"></div>
+  <div class="app-root">
+    <div class="layout">
+      <aside class="panel sidebar">
+        <div class="panel-header">
+          <div class="title">CONNECT DOTS</div>
+          <div class="subtitle">Instant Risk · Reward</div>
+        </div>
+
+        <div class="mode-tabs" aria-label="Mode">
+          <button type="button" class="mode-tab active">Manual</button>
+          <button type="button" class="mode-tab">Auto</button>
+        </div>
+
+        <div class="sidebar-section balance-section">
+          <div class="section-row">
+            <span class="section-label">Balance</span>
+            <span class="section-value" id="balanceValue">$100.00</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-row">
+            <span class="section-label">Bet Amount</span>
+          </div>
+          <div class="bet-amount-row">
+            <div class="bet-input-wrapper">
+              <button id="betMinus" type="button" class="bet-step-btn">−</button>
+              <input id="betValue" type="number" class="bet-input-display" value="1.00" step="0.01" min="0.10" max="500" placeholder="0.00" />
+              <button id="betPlus" type="button" class="bet-step-btn">+</button>
+            </div>
+            <div class="bet-quick-buttons">
+              <button type="button" class="quick-btn" id="betHalf">½</button>
+              <button type="button" class="quick-btn" id="betDouble">2×</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section stats-section">
+          <div class="section-row">
+            <span class="section-label">Multiplier</span>
+            <span class="section-value" id="multiplierValue">1.00×</span>
+          </div>
+          <div class="section-row">
+            <span class="section-label">Current Win</span>
+            <span class="section-value" id="winValue">$0.00</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section auto-section" id="autoSection" style="display: none;">
+          <div class="section-row">
+            <span class="section-label">Target Multiplier</span>
+            <span class="section-value" id="targetMultiplierValue">1.00×</span>
+          </div>
+          <div class="auto-slider-wrapper">
+            <input type="range" id="targetMultiplierSlider" class="auto-slider" min="1" max="8" step="1" value="2" />
+            <div class="auto-slider-label" id="targetStepLabel">≈ Step 2</div>
+          </div>
+          
+          <div class="section-row">
+            <span class="section-label">Number of Bets</span>
+          </div>
+          <div class="number-of-bets-wrapper">
+            <div class="number-input-container">
+              <input type="number" id="numberOfBetsInput" class="number-input" min="0" value="0" />
+              <div class="number-input-spinner spinner-left" id="numberOfBetsSpinner">
+                <button type="button" class="spinner-btn spinner-up" id="numberOfBetsUp">▲</button>
+                <button type="button" class="spinner-btn spinner-down" id="numberOfBetsDown">▼</button>
+              </div>
+              <button type="button" class="infinity-btn" id="numberOfBetsInfinity" title="Unlimited">∞</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section buttons-section">
+          <button id="startButton" type="button" class="primary-btn">Bet</button>
+          <button id="stopButton" type="button" class="primary-btn stop-btn" style="display: none;">Stop</button>
+          <button id="cashoutButton" type="button" class="secondary-btn" disabled>Cash Out</button>
+        </div>
+      </aside>
+
+      <main class="game-panel">
+        <div class="game-panel-header">
+          <div class="game-title-row">
+            <div class="game-title" id="gameModeName">Classic</div>
+            <div class="grid-toggle" aria-label="Grid size">
+              <button type="button" class="grid-toggle-btn active" data-grid-size="3">3×3</button>
+              <button type="button" class="grid-toggle-btn" data-grid-size="4">4×4</button>
+            </div>
+          </div>
+          <div class="game-subtitle">Connect dots · Avoid stop-points · Cash out anytime</div>
+        </div>
+
+        <div class="board-shell">
+          <div class="board-inner">
+            <canvas id="gameCanvas"></canvas>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script>
+    // Create watermark grid
+    (function() {
+      const watermark = document.querySelector('.watermark');
+      if (!watermark) return;
+      
+      const text = 'Made by https://t.me/Dmitriy0x';
+      const cols = 6;
+      const rows = 6;
+      const spacing = 300;
+      
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const span = document.createElement('span');
+          span.textContent = text;
+          span.style.position = 'absolute';
+          span.style.top = (i * spacing - spacing) + 'px';
+          span.style.left = (j * spacing - spacing) + 'px';
+          span.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+          span.style.fontSize = '15px';
+          span.style.color = 'rgba(255, 255, 255, 0.2)';
+          span.style.fontWeight = '300';
+          span.style.letterSpacing = '2px';
+          span.style.textTransform = 'uppercase';
+          span.style.transform = 'rotate(-45deg)';
+          span.style.transformOrigin = 'center';
+          span.style.whiteSpace = 'nowrap';
+          span.style.pointerEvents = 'none';
+          watermark.appendChild(span);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
+
+
