@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Simulation Panel - Stix</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #00d9ff;
+      text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+    }
+    
+    .warning {
+      background: rgba(255, 107, 107, 0.1);
+      border: 2px solid #ff6b6b;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #ff6b6b;
+      font-weight: 600;
+    }
+    
+    .panel {
+      background: rgba(30, 30, 50, 0.8);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(100, 100, 150, 0.3);
+    }
+    
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #00d9ff;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    input, select {
+      padding: 12px 16px;
+      background: rgba(20, 20, 40, 0.8);
+      border: 2px solid rgba(100, 100, 150, 0.4);
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #00d9ff;
+      box-shadow: 0 0 12px rgba(0, 217, 255, 0.3);
+    }
+    
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    button.primary {
+      background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+      color: #fff;
+    }
+    
+    button.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.4);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .stat-card {
+      background: rgba(20, 20, 40, 0.6);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(100, 100, 150, 0.3);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #00d9ff;
+    }
+    
+    .stat-value.positive {
+      color: #51cf66;
+    }
+    
+    .stat-value.negative {
+      color: #ff6b6b;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .progress {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(20, 20, 40, 0.8);
+      border-radius: 8px;
+      text-align: center;
+      color: #00d9ff;
+      font-weight: 600;
+    }
+    
+    .watermark {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999999;
+      overflow: visible;
+      background-image: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 199px,
+          rgba(255, 255, 255, 0.08) 199px,
+          rgba(255, 255, 255, 0.08) 200px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 199px,
+          rgba(255, 255, 255, 0.08) 199px,
+          rgba(255, 255, 255, 0.08) 200px
+        );
+      background-size: 100% 100%;
+      background-repeat: repeat;
+      opacity: 0.2;
+    }
+    
+    .watermark span {
+      position: absolute;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.2);
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transform: rotate(-45deg);
+      transform-origin: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="watermark"></div>
+  <div class="container">
+    <h1>🎲 Developer Simulation Panel</h1>
+    
+    <div class="warning">
+      ⚠️ DEVELOPER ONLY ⚠️
+    </div>
+    
+    <div class="panel">
+      <h2>Simulation Parameters</h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Grid Mode</label>
+          <select id="gridMode">
+            <option value="3">3x3 (Classic)</option>
+            <option value="4">4x4 (Advanced)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Bet Amount ($)</label>
+          <input type="number" id="betAmount" value="1.00" min="0.10" step="0.10">
+        </div>
+        
+        <div class="form-group">
+          <label>Target Step & Multiplier</label>
+          <select id="targetStep">
+            <!-- Options will be populated dynamically by JavaScript -->
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Number of Rounds</label>
+          <select id="numRounds">
+            <option value="10000">10,000</option>
+            <option value="50000" selected>50,000</option>
+            <option value="100000">100,000</option>
+            <option value="250000">250,000</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Starting Balance ($)</label>
+          <input type="number" id="startBalance" value="10000" min="1" step="100">
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button class="primary" id="runBtn">Run Simulation</button>
+      </div>
+      
+      <div id="progress" class="progress hidden">
+        Running simulation...
+      </div>
+    </div>
+    
+    <div class="panel" id="resultsPanel" style="display: none;">
+      <h2>Simulation Results</h2>
+      
+      <div class="results-grid">
+        <div class="stat-card">
+          <div class="stat-label">Start Balance</div>
+          <div class="stat-value" id="statStartBalance">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">End Balance</div>
+          <div class="stat-value" id="statEndBalance">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Net P&L</div>
+          <div class="stat-value" id="statPnL">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Total Wagered</div>
+          <div class="stat-value" id="statTotalWagered">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">RTP</div>
+          <div class="stat-value" id="statRTP">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value" id="statWinRate">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Max Drawdown</div>
+          <div class="stat-value" id="statMaxDrawdown">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Max Win (Single)</div>
+          <div class="stat-value" id="statMaxWin">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Longest Losing Streak</div>
+          <div class="stat-value" id="statLongestStreak">-</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-label">Total Rounds</div>
+          <div class="stat-value" id="statTotalRounds">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Load game.js to access GameMath API -->
+  <script src="game.js"></script>
+  <script src="simulation.js"></script>
+  
+  <script>
+    // Populate target step dropdown based on grid mode
+    function populateTargetStepOptions() {
+      const gridMode = parseInt(document.getElementById('gridMode').value);
+      const targetStepSelect = document.getElementById('targetStep');
+      
+      // Clear existing options
+      targetStepSelect.innerHTML = '';
+      
+      // Get grid config
+      const gridConfig = window.GameMath.CONFIG.grids[gridMode];
+      if (!gridConfig) {
+        console.error('Invalid grid mode:', gridMode);
+        return;
+      }
+      
+      // Calculate max practical steps (exclude last extremely risky step)
+      // 3x3: 9 - 1 - 1 = 7 steps (exclude step 8 with 50% probability)
+      // 4x4: 16 - 2 - 1 = 13 steps (exclude step 14 with 33% probability)
+      const maxSteps = gridConfig.total - gridConfig.stopPoints - 1;
+      
+      // Populate options (calculate multipliers dynamically)
+      for (let step = 1; step <= maxSteps; step++) {
+        const multiplier = window.GameMath.getMultiplierForStep(step, gridMode);
+        const option = document.createElement('option');
+        option.value = step;
+        option.textContent = `Step ${step} — ${multiplier.toFixed(2)}x`;
+        targetStepSelect.appendChild(option);
+      }
+    }
+    
+    // Run simulation
+    async function runSimulation() {
+      const runBtn = document.getElementById('runBtn');
+      const progress = document.getElementById('progress');
+      const resultsPanel = document.getElementById('resultsPanel');
+      
+      // Disable button and show progress
+      runBtn.disabled = true;
+      progress.classList.remove('hidden');
+      resultsPanel.style.display = 'none';
+      
+      // Get parameters
+      const gridSize = parseInt(document.getElementById('gridMode').value);
+      const bet = parseFloat(document.getElementById('betAmount').value);
+      const targetStep = parseInt(document.getElementById('targetStep').value);
+      const rounds = parseInt(document.getElementById('numRounds').value);
+      const startBalance = parseFloat(document.getElementById('startBalance').value);
+      
+      // Small delay to let UI update
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      try {
+        // Measure execution time
+        const startTime = performance.now();
+        
+        // Run simulation
+        const results = window.SimulationEngine.runSimulation({
+          rounds: rounds,
+          startBalance: startBalance,
+          bet: bet,
+          gridSize: gridSize,
+          targetStep: targetStep
+        });
+        
+        const endTime = performance.now();
+        const duration = ((endTime - startTime) / 1000).toFixed(2);
+        
+        // Add duration to results
+        results.duration = duration;
+        
+        // Display results
+        displayResults(results);
+        
+        // Update progress with completion time
+        progress.textContent = `✓ Completed in ${duration}s`;
+        
+      } catch (error) {
+        console.error('Simulation error:', error);
+        alert('Simulation failed: ' + error.message);
+        progress.textContent = '✗ Simulation failed';
+      } finally {
+        runBtn.disabled = false;
+      }
+    }
+    
+    function displayResults(results) {
+      const resultsPanel = document.getElementById('resultsPanel');
+      resultsPanel.style.display = 'block';
+      
+      // Format numbers with safe fallbacks for undefined values
+      const fmt = (num) => (num ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const pct = (num) => ((num ?? 0) * 100).toFixed(2) + '%';
+      const safeNum = (num) => (num ?? 0).toLocaleString();
+      
+      // Update stats
+      document.getElementById('statStartBalance').textContent = '$' + fmt(results.startBalance);
+      document.getElementById('statEndBalance').textContent = '$' + fmt(results.endBalance);
+      
+      const pnl = (results.endBalance ?? 0) - (results.startBalance ?? 0);
+      const pnlEl = document.getElementById('statPnL');
+      pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + fmt(pnl);
+      pnlEl.className = 'stat-value ' + (pnl >= 0 ? 'positive' : 'negative');
+      
+      document.getElementById('statTotalWagered').textContent = '$' + fmt(results.totalWagered);
+      
+      const rtpEl = document.getElementById('statRTP');
+      rtpEl.textContent = pct(results.rtp);
+      rtpEl.className = 'stat-value ' + ((results.rtp ?? 0) >= 1.0 ? 'positive' : 'negative');
+      
+      document.getElementById('statWinRate').textContent = pct(results.winRate);
+      document.getElementById('statMaxDrawdown').textContent = '$' + fmt(results.maxDrawdown);
+      document.getElementById('statMaxWin').textContent = '$' + fmt(results.maxWin);
+      document.getElementById('statLongestStreak').textContent = safeNum(results.longestLosingStreak);
+      document.getElementById('statTotalRounds').textContent = safeNum(results.totalRounds);
+      
+      // Scroll to results
+      resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // Event listeners
+    document.getElementById('gridMode').addEventListener('change', populateTargetStepOptions);
+    document.getElementById('runBtn').addEventListener('click', runSimulation);
+    
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      populateTargetStepOptions();
+    });
+  </script>
+  
+  <script>
+    // Create watermark grid
+    (function() {
+      const watermark = document.querySelector('.watermark');
+      if (!watermark) return;
+      
+      const text = 'Made by https://t.me/Dmitriy0x';
+      const cols = 6;
+      const rows = 6;
+      const spacing = 300;
+      
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const span = document.createElement('span');
+          span.textContent = text;
+          span.style.position = 'absolute';
+          span.style.top = (i * spacing - spacing) + 'px';
+          span.style.left = (j * spacing - spacing) + 'px';
+          span.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+          span.style.fontSize = '15px';
+          span.style.color = 'rgba(255, 255, 255, 0.2)';
+          span.style.fontWeight = '300';
+          span.style.letterSpacing = '2px';
+          span.style.textTransform = 'uppercase';
+          span.style.transform = 'rotate(-45deg)';
+          span.style.transformOrigin = 'center';
+          span.style.whiteSpace = 'nowrap';
+          span.style.pointerEvents = 'none';
+          watermark.appendChild(span);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
+
